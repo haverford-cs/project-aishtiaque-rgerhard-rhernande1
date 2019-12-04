@@ -37,6 +37,7 @@ def main():
             previous = lst[-1]
             price_change = float(row['Close']) - float(previous['Close'])
             row['label'] = sign(price_change)
+            del row['OpenInt']
             lst.append(row)
 
     # we discard the first data point since it doesn't have a label.
@@ -45,7 +46,7 @@ def main():
     # write the data points with labels to CSV
     with open(f"{filename}_with_labels.csv", 'w') as csvfile:
         fieldnames = ['Date', 'Open',
-                'High', 'Low', 'Close', 'Volume', 'OpenInt', 'label']
+                'High', 'Low', 'Close', 'Volume', 'label']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for item in lst:
