@@ -4,4 +4,6 @@ This is the final project by Rudy Hernandez, Russell Gerhard and Ahmed Ishtiaque
 
 Our goal is to implement a machine learning model to predict a chosen company's stock price the day after a chosen date, based on the stock's historical data.
 
-The dataset we are using is the 
+
+#### Dataset
+The dataset we are using is the [Huge Stock Market Dataset](https://www.kaggle.com/borismarjanovic/price-volume-data-for-all-us-stocks-etfs) from Kaggle. This dataset provides CSVs containing open, high, low, and closing prices as well as volume of stocks from numerous companies till November 11, 2017.
