@@ -1,0 +1,8 @@
+from talib import CDLMORNINGDOJISTAR
+import numpy
+
+close = numpy.random.random(100)
+open = numpy.random.random(100)
+high = numpy.random.random(100)
+low = numpy.random.random(100)
+print(CDLMORNINGDOJISTAR(open,high,low,close).shape)

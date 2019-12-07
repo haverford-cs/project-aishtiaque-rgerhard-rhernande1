@@ -10,48 +10,67 @@
 
     Outputs the labelled dataset to <filename>_with_labels.csv file.
 '''
-
-
+import numpy as np
 import argparse
 import csv
+from rnd import Stock
+import talib
 
+def featurize_data(data):
+    # Initialize output array
+    output = np.ones((len(data), 1))
+
+    # Iterate over function to match candlestick patterns
+    for func in talib.get_function_groups()['Pattern Recognition']:
+        # Interpret strings as functions and call them on numeric data
+        func_to_call = getattr(talib, func)
+        feature_column = func_to_call(data['Open'], data['High'], data['Low'], data['Close']).reshape(len(data),1)
+
+        # Column join indicator output for candlestick pattern features
+        output = np.concatenate((output, feature_column), axis=1)
+
+    # Concatenate labels to final dataframe
+    output = np.concatenate((output, data['Label'].reshape(len(data), 1)), axis=1)
+    output = output[:,1:]
+
+    for row in output:
+        print(row)
 
 def main():
+
+    # Create parser to get raw csv filename argument
     parser = argparse.ArgumentParser(
         description='Create training dataset from OHLCV data.'
     )
+
+    # Add argument to parser for filename
     parser.add_argument('--f', required=True,
         help='enter filename of CSV with data in following format: '
             + 'Date,Open,High,Low,Close,Volume,OpenInt. The file should be '
             + 'in the same directory.')
 
+    # Get the actual argument
     args = parser.parse_args()
     filename = args.f
 
-    with open(filename, 'r') as f:
-        reader = csv.DictReader(f)
-        lst = []
-        for row in reader:
-            if not lst:
-                lst.append(row)
-            previous = lst[-1]
-            price_change = float(row['Close']) - float(previous['Close'])
-            row['label'] = sign(price_change)
-            del row['OpenInt']
-            lst.append(row)
+    # Dump csv data into numpy array
+    raw_data = np.genfromtxt(args.f, dtype = float, delimiter=",",
+     names=["Date", "Open", "High", "Low", "Close", "Volume", "Label"])
 
-    # we discard the first data point since it doesn't have a label.
-    lst = lst[1:]
+    # Generate labels
+    for i,row in enumerate(raw_data):
+        if i <= 1:
+            continue
+        difference = raw_data[i]['Close'] - raw_data[i-1]['Close']
+        raw_data[i]['Label'] = sign(difference)
 
-    # write the data points with labels to CSV
-    with open(f"{filename}_with_labels.csv", 'w') as csvfile:
-        fieldnames = ['Date', 'Open',
-                'High', 'Low', 'Close', 'Volume', 'label']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        for item in lst:
-            writer.writerow(item)
+    # remove header and first day of trading
+    data = raw_data[2:]
 
+    # featurize the data
+    featurized_data = featurize_data(data)
+    #
+    # return Stock(featurized_data)
 
 def sign(num):
     '''
@@ -61,7 +80,6 @@ def sign(num):
         return 1
     else:
         return -1
-
 
 if __name__ == '__main__':
     main()
