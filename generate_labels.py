@@ -13,7 +13,9 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import confusion_matrix
+from sklearn.linear_model import LogisticRegression
+
+from sklearn.metrics import confusion_matrix, accuracy_score
 
 import matplotlib.pyplot as plt
 
@@ -41,6 +43,11 @@ def featurize_data(data):
 
         # Column join indicator output for candlestick pattern features
         output = np.concatenate((output, feature_column), axis=1)
+
+    output = np.concatenate((
+                output,
+                data['Volume'].reshape(len(data), 1)),
+            axis=1)
 
     # Concatenate labels to final dataframe
     output = np.concatenate((
@@ -106,8 +113,10 @@ def main():
     data = raw_data[2:]
 
     # featurize the data
-    data_with_features = featurize_data(data)
-    train_X, train_y, test_X, test_y = split_dataset(data_with_features)
+    data = featurize_data(data)
+
+
+    # train_X, train_y, test_X, test_y = split_dataset(data_with_features)
     # print(data_with_features.shape)
     # print(train_X.shape)
     # print(train_y.shape)
@@ -116,30 +125,82 @@ def main():
 
     #  create and fit a random forest classifier for the given training dataset
 
+    # accuracies = []
+    # iterate = range(1, 1000, 10)
+
+    # for i in range(1, 6):
+    #     for j in range(0, len(data), math.floor(len(data)/i) - 1): #start at 0, stop at len(data), step by the len(data)/i
+    #         chunk = data[j:j+math.floor(len(data)/i)]
+    #         print(len(chunk))
+	#           #do stuff with chunk of data
+
     accuracies = []
-    iterate = range(1, 1000, 10)
+    num_batches = range(2, 10)
+    for i in num_batches:
+        print("===================================================")
+        print("number of batches:", i)
+        y_true = []
+        y_pred = []
+        # print("data shape before:", data.shape)
+        data = data[:len(data) - len(data) % i]
+        # print("data shape:", data.shape)
+        chunks = np.split(data, i)
+        for chunk in chunks:
+            train = chunk[:-1]
+            test = chunk[-1]
+            train_X = train[:,:-1]
+            train_y = train[:,-1]
+            test_X = test[:-1].reshape((1, len(test[:-1])))
+            y_true.append(test[-1])
+            test_y = test[-1].reshape((1,))
+            clf = RandomForestClassifier(n_estimators=10)
+            clf = clf.fit(train_X, train_y)
+            y_pred.append(clf.predict(test_X))
+            # print("\nRunning Random Forest on dataset...")
+            # y_pred = fit_and_test(rf_clf, train_X, train_y, test_X, test_y)
 
-    for i in iterate:
+        print("confusion_matrix: \n",
+            confusion_matrix(y_true, y_pred, labels=[-1,1]))
+        score = accuracy_score(y_true, y_pred)
+        print("Accuracy: ", score)
+        accuracies.append(score)
 
-        # rf_clf = RandomForestClassifier(n_estimators=i)
-        # # print("\nRunning Random Forest on dataset...")
-        # accuracies.append(fit_and_test(rf_clf, train_X, train_y, test_X, test_y))
+    print("Average accuracy: ", sum(accuracies)/len(accuracies))
+    plt.ylim((0, 1.1))
+    plt.plot(num_batches, accuracies)
+    plt.xlabel("Number of batches")
+    plt.ylabel("Accuracy")
+    # plt.title("Performance of AdaBoost")
+    plt.show()
+
+
+
+
+    # for i in iterate:
+
+    # rf_clf = RandomForestClassifier(n_estimators=10)
+    # print("\nRunning Random Forest on dataset...")
+    # fit_and_test(rf_clf, train_X, train_y, test_X, test_y)
+    # accuracies.append(fit_and_test(rf_clf, train_X, train_y, test_X, test_y))
 
 
         # knn_clf = KNeighborsClassifier(n_neighbors=i)
         # # print("\nRunning kNN on dataset...")
         # accuracies.append(fit_and_test(knn_clf, train_X, train_y, test_X, test_y))
 
-        ab_clf = AdaBoostClassifier(n_estimators=i)
-        accuracies.append(fit_and_test(ab_clf, train_X, train_y, test_X, test_y))
+        # ab_clf = AdaBoostClassifier(n_estimators=i)
+        # accuracies.append(fit_and_test(ab_clf, train_X, train_y, test_X, test_y))
+
+    # clf = LogisticRegression(random_state=0)
+    # fit_and_test(clf, train_X, train_y, test_X, test_y)
 
 
-    plt.ylim((0, 1.1))
-    plt.plot(iterate, accuracies)
-    plt.xlabel("Number of classifiers")
-    plt.ylabel("Accuracy")
-    plt.title("Performance of AdaBoost")
-    plt.show()
+    # plt.ylim((0, 1.1))
+    # plt.plot(iterate, accuracies)
+    # plt.xlabel("Number of classifiers")
+    # plt.ylabel("Accuracy")
+    # plt.title("Performance of AdaBoost")
+    # plt.show()
 
 
 def fit_and_test(clf, train_X, train_y, test_X, test_y):
@@ -151,11 +212,12 @@ def fit_and_test(clf, train_X, train_y, test_X, test_y):
     for i in range(len(y_pred)):
         if y_pred[i] == test_y[i]:
             correct += 1
-    accuracy = (correct/len(y_pred))
+    # accuracy = (correct/len(y_pred))
     # print(f"Accuracy: {accuracy * 100}%")
     # print("confusion_matrix: \n",
-        # confusion_matrix(test_y, y_pred, labels=[-1,1]))
-    return accuracy
+    #     confusion_matrix(test_y, y_pred, labels=[-1,1]))
+    # return accuracy
+    return correct
 
 
 def sign(num):
