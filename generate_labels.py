@@ -9,7 +9,13 @@ import talib
 import random
 import math
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import confusion_matrix
+
+import matplotlib.pyplot as plt
 
 
 def featurize_data(data):
@@ -89,10 +95,11 @@ def main():
      names=["Date", "Open", "High", "Low", "Close", "Volume", "Label"])
 
     # Generate labels
-    for i,row in enumerate(raw_data):
-        if i <= 1:
-            continue
-        difference = raw_data[i]['Close'] - raw_data[i-1]['Close']
+    # for i,row in enumerate(raw_data):
+    for i in range(len(raw_data) - 1):
+        # if i <= 1:
+            # continue
+        difference = raw_data[i]['Close'] - raw_data[i+1]['Close']
         raw_data[i]['Label'] = sign(difference)
 
     # remove header and first day of trading
@@ -107,8 +114,35 @@ def main():
     # print(test_X.shape)
     # print(test_y.shape)
 
-    # create and fit a random forest classifier for the given training dataset
-    clf = RandomForestClassifier(n_estimators=10)
+    #  create and fit a random forest classifier for the given training dataset
+
+    accuracies = []
+    iterate = range(1, 1000, 10)
+
+    for i in iterate:
+
+        # rf_clf = RandomForestClassifier(n_estimators=i)
+        # # print("\nRunning Random Forest on dataset...")
+        # accuracies.append(fit_and_test(rf_clf, train_X, train_y, test_X, test_y))
+
+
+        # knn_clf = KNeighborsClassifier(n_neighbors=i)
+        # # print("\nRunning kNN on dataset...")
+        # accuracies.append(fit_and_test(knn_clf, train_X, train_y, test_X, test_y))
+
+        ab_clf = AdaBoostClassifier(n_estimators=i)
+        accuracies.append(fit_and_test(ab_clf, train_X, train_y, test_X, test_y))
+
+
+    plt.ylim((0, 1.1))
+    plt.plot(iterate, accuracies)
+    plt.xlabel("Number of classifiers")
+    plt.ylabel("Accuracy")
+    plt.title("Performance of AdaBoost")
+    plt.show()
+
+
+def fit_and_test(clf, train_X, train_y, test_X, test_y):
     clf = clf.fit(train_X, train_y)
     y_pred = clf.predict(test_X)
     correct = 0
@@ -117,7 +151,11 @@ def main():
     for i in range(len(y_pred)):
         if y_pred[i] == test_y[i]:
             correct += 1
-    print(f"Accuracy: {(correct/len(y_pred)) * 100}%")
+    accuracy = (correct/len(y_pred))
+    # print(f"Accuracy: {accuracy * 100}%")
+    # print("confusion_matrix: \n",
+        # confusion_matrix(test_y, y_pred, labels=[-1,1]))
+    return accuracy
 
 
 def sign(num):
