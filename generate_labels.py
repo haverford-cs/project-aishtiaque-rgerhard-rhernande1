@@ -102,11 +102,10 @@ def main():
      names=["Date", "Open", "High", "Low", "Close", "Volume", "Label"])
 
     # Generate labels
-    # for i,row in enumerate(raw_data):
     for i in range(len(raw_data) - 1):
-        # if i <= 1:
-            # continue
-        difference = raw_data[i]['Close'] - raw_data[i+1]['Close']
+
+        # Assuming we're day trading here, i.e. buy the open, sell the close on the SAME day
+        difference = raw_data[i+1]['Close'] - raw_data[i+1]['Open']
         raw_data[i]['Label'] = sign(difference)
 
     # remove header and first day of trading
@@ -134,28 +133,28 @@ def main():
     #         print(len(chunk))
 	#           #do stuff with chunk of data
 
-    accuracies = []
-    num_batches = range(2, 10)
-    for i in num_batches:
-        print("===================================================")
-        print("number of batches:", i)
-        y_true = []
-        y_pred = []
-        # print("data shape before:", data.shape)
-        data = data[:len(data) - len(data) % i]
-        # print("data shape:", data.shape)
-        chunks = np.split(data, i)
-        for chunk in chunks:
-            train = chunk[:-1]
-            test = chunk[-1]
-            train_X = train[:,:-1]
-            train_y = train[:,-1]
-            test_X = test[:-1].reshape((1, len(test[:-1])))
-            y_true.append(test[-1])
-            test_y = test[-1].reshape((1,))
-            clf = RandomForestClassifier(n_estimators=10)
-            clf = clf.fit(train_X, train_y)
-            y_pred.append(clf.predict(test_X))
+    # accuracies = []
+    # num_batches = range(2, 10)
+    # for i in num_batches:
+    #     print("===================================================")
+    #     print("number of batches:", i)
+    #     y_true = []
+    #     y_pred = []
+    #     # print("data shape before:", data.shape)
+    #     data = data[:len(data) - len(data) % i]
+    #     # print("data shape:", data.shape)
+    #     chunks = np.split(data, i)
+    #     for chunk in chunks:
+    #         train = chunk[:-1]
+    #         test = chunk[-1]
+    #         train_X = train[:,:-1]
+    #         train_y = train[:,-1]
+    #         test_X = test[:-1].reshape((1, len(test[:-1])))
+    #         y_true.append(test[-1])
+    #         test_y = test[-1].reshape((1,))
+    #         clf = RandomForestClassifier(n_estimators=10)
+    #         clf = clf.fit(train_X, train_y)
+    #         y_pred.append(clf.predict(test_X))
             # print("\nRunning Random Forest on dataset...")
             # y_pred = fit_and_test(rf_clf, train_X, train_y, test_X, test_y)
 
