@@ -1,6 +1,3 @@
-'''
-
-'''
 import numpy as np
 import argparse
 import csv
@@ -114,6 +111,8 @@ def main():
     # featurize the data
     data = featurize_data(data)
 
+    print(data)
+
 
     # train_X, train_y, test_X, test_y = split_dataset(data_with_features)
     # print(data_with_features.shape)
@@ -157,20 +156,20 @@ def main():
     #         y_pred.append(clf.predict(test_X))
             # print("\nRunning Random Forest on dataset...")
             # y_pred = fit_and_test(rf_clf, train_X, train_y, test_X, test_y)
-
-        print("confusion_matrix: \n",
-            confusion_matrix(y_true, y_pred, labels=[-1,1]))
-        score = accuracy_score(y_true, y_pred)
-        print("Accuracy: ", score)
-        accuracies.append(score)
-
-    print("Average accuracy: ", sum(accuracies)/len(accuracies))
-    plt.ylim((0, 1.1))
-    plt.plot(num_batches, accuracies)
-    plt.xlabel("Number of batches")
-    plt.ylabel("Accuracy")
-    # plt.title("Performance of AdaBoost")
-    plt.show()
+    #
+    #     print("confusion_matrix: \n",
+    #         confusion_matrix(y_true, y_pred, labels=[-1,1]))
+    #     score = accuracy_score(y_true, y_pred)
+    #     print("Accuracy: ", score)
+    #     accuracies.append(score)
+    #
+    # print("Average accuracy: ", sum(accuracies)/len(accuracies))
+    # plt.ylim((0, 1.1))
+    # plt.plot(num_batches, accuracies)
+    # plt.xlabel("Number of batches")
+    # plt.ylabel("Accuracy")
+    # # plt.title("Performance of AdaBoost")
+    # plt.show()
 
 
 
@@ -202,23 +201,23 @@ def main():
     # plt.show()
 
 
-def fit_and_test(clf, train_X, train_y, test_X, test_y):
-    clf = clf.fit(train_X, train_y)
-    y_pred = clf.predict(test_X)
-    correct = 0
-
-    # get accuracy
-    for i in range(len(y_pred)):
-        if y_pred[i] == test_y[i]:
-            correct += 1
-    # accuracy = (correct/len(y_pred))
-    # print(f"Accuracy: {accuracy * 100}%")
-    # print("confusion_matrix: \n",
-    #     confusion_matrix(test_y, y_pred, labels=[-1,1]))
-    # return accuracy
-    return correct
-
-
+# def fit_and_test(clf, train_X, train_y, test_X, test_y):
+#     clf = clf.fit(train_X, train_y)
+#     y_pred = clf.predict(test_X)
+#     correct = 0
+#
+#     # get accuracy
+#     for i in range(len(y_pred)):
+#         if y_pred[i] == test_y[i]:
+#             correct += 1
+#     # accuracy = (correct/len(y_pred))
+#     # print(f"Accuracy: {accuracy * 100}%")
+#     # print("confusion_matrix: \n",
+#     #     confusion_matrix(test_y, y_pred, labels=[-1,1]))
+#     # return accuracy
+#     return correct
+#
+#
 def sign(num):
     '''
         If a number is positive, return 1. Else, return -1.
