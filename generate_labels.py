@@ -1,6 +1,3 @@
-'''
-
-'''
 import numpy as np
 import argparse
 import csv
@@ -202,11 +199,10 @@ def main():
      names=["Date", "Open", "High", "Low", "Close", "Volume", "Label"])
 
     # Generate labels
-    # for i,row in enumerate(raw_data):
     for i in range(len(raw_data) - 1):
-        # if i <= 1:
-            # continue
-        difference = raw_data[i]['Close'] - raw_data[i+1]['Close']
+
+        # Assuming we're day trading here, i.e. buy the open, sell the close on the SAME day
+        difference = raw_data[i+1]['Close'] - raw_data[i+1]['Open']
         raw_data[i]['Label'] = sign(difference)
 
     # remove header and first day of trading
@@ -214,6 +210,8 @@ def main():
 
     # featurize the data
     data = featurize_data(data)
+
+    print(data)
 
 
     train_X, train_y, test_X, test_y = split_dataset(data)
@@ -365,23 +363,23 @@ def main():
     # plt.show()
 
 
-def fit_and_test(clf, train_X, train_y, test_X, test_y):
-    clf = clf.fit(train_X, train_y)
-    y_pred = clf.predict(test_X)
-    correct = 0
-
-    # get accuracy
-    for i in range(len(y_pred)):
-        if y_pred[i] == test_y[i]:
-            correct += 1
-    # accuracy = (correct/len(y_pred))
-    # print(f"Accuracy: {accuracy * 100}%")
-    # print("confusion_matrix: \n",
-    #     confusion_matrix(test_y, y_pred, labels=[-1,1]))
-    # return accuracy
-    return correct
-
-
+# def fit_and_test(clf, train_X, train_y, test_X, test_y):
+#     clf = clf.fit(train_X, train_y)
+#     y_pred = clf.predict(test_X)
+#     correct = 0
+#
+#     # get accuracy
+#     for i in range(len(y_pred)):
+#         if y_pred[i] == test_y[i]:
+#             correct += 1
+#     # accuracy = (correct/len(y_pred))
+#     # print(f"Accuracy: {accuracy * 100}%")
+#     # print("confusion_matrix: \n",
+#     #     confusion_matrix(test_y, y_pred, labels=[-1,1]))
+#     # return accuracy
+#     return correct
+#
+#
 def sign(num):
     '''
         If a number is positive, return 1. Else, return -1.
