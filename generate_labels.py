@@ -13,7 +13,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import SelectFromModel
 
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
 
 import matplotlib.pyplot as plt
 
@@ -119,40 +119,49 @@ def main():
     accuracies = []
     iterate = range(1, 100, 10)
 
-    for j in range(50):
-        for i in range(50):
-            train_X, train_y, test_X, test_y = split_dataset(data)
-            clf = AdaBoostClassifier(n_estimators=10)
-            fit_and_test(clf, train_X, train_y, test_X, test_y)
-            accuracies.append(fit_and_test(clf, train_X, train_y, test_X, test_y))
+    # for j in range(50):
+    # for i in range(50):
+    train_X, train_y, test_X, test_y = split_dataset(data)
+    clfs = [
+        AdaBoostClassifier(n_estimators=10),
+        RandomForestClassifier(n_estimators=10),
+        MLPClassifier(learning_rate_init=0.001,
+                        learning_rate='constant',
+                        solver='sgd',
+                        max_iter=1000,
+                        early_stopping=True)
+    ]
+    plt.clf()
+    for clf in clfs:
+        clf = clf.fit(train_X, train_y)
+        y_pred = clf.predict(test_X)
+        fpr, tpr, _ = roc_curve(test_y, y_pred, pos_label=1)
+        name = clf.__class__.__name__
+        plt.plot(fpr, tpr, label=name)
 
-        print("Average accuracy:", sum(accuracies)/len(accuracies))
-
-        # reset avg accuracy
-        accuracies = []
     plt.ylim((0, 1.1))
-    plt.plot(range(50), accuracies)
-    plt.xlabel("Runs")
-    plt.ylabel("Accuracy")
-    plt.title("Performance of Random Forest")
+    plt.legend()
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Comparison of ROC Curves")
     plt.show()
 
 
-def fit_and_test(clf, train_X, train_y, test_X, test_y):
-    clf = clf.fit(train_X, train_y)
-    y_pred = clf.predict(test_X)
-    correct = 0
-
-    # get accuracy
-    for i in range(len(y_pred)):
-        if y_pred[i] == test_y[i]:
-            correct += 1
-    accuracy = (correct/len(y_pred))
-    # print(f"Accuracy: {accuracy * 100}%")
-    # print("confusion_matrix: \n",
-    #     confusion_matrix(test_y, y_pred, labels=[-1,1]))
-    return accuracy
-    # return correct
+# def fit_and_test(clf, train_X, train_y, test_X, test_y):
+#     clf = clf.fit(train_X, train_y)
+#     y_pred = clf.predict(test_X)
+#     correct = 0
+#
+#     # get accuracy
+#     for i in range(len(y_pred)):
+#         if y_pred[i] == test_y[i]:
+#             correct += 1
+#     accuracy = (correct/len(y_pred))
+#     print(f"Accuracy: {accuracy * 100}%")
+#     print("confusion_matrix: \n",
+#         confusion_matrix(test_y, y_pred, labels=[-1,1]))
+#     return accuracy
+#     # return correct
 
 
 def sign(num):
