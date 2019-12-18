@@ -11,15 +11,17 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.feature_selection import SelectFromModel
+from sklearn.feature_selection import SelectFromModel, VarianceThreshold
 
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
 
 import matplotlib.pyplot as plt
 
-from fc_nn import FCmodel
+from cv_util import run_tune_test, show_foldwise_scores
 
-import tensorflow as tf
+import warnings
+# suppress warnings
+warnings.simplefilter(action='ignore')
 
 
 def featurize_data(data):
@@ -121,48 +123,52 @@ def main():
 
     # for j in range(50):
     # for i in range(50):
-    train_X, train_y, test_X, test_y = split_dataset(data)
-    clfs = [
-        AdaBoostClassifier(n_estimators=10),
-        RandomForestClassifier(n_estimators=10),
-        MLPClassifier(learning_rate_init=0.001,
-                        learning_rate='constant',
-                        solver='sgd',
-                        max_iter=1000,
-                        early_stopping=True)
-    ]
-    plt.clf()
-    for clf in clfs:
-        clf = clf.fit(train_X, train_y)
-        y_pred = clf.predict(test_X)
-        fpr, tpr, _ = roc_curve(test_y, y_pred, pos_label=1)
-        name = clf.__class__.__name__
-        plt.plot(fpr, tpr, label=name)
-
-    plt.ylim((0, 1.1))
-    plt.legend()
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("Comparison of ROC Curves")
-    plt.show()
+    X_train, y_train, X_test, y_test = split_dataset(data)
+    X, y = data[:,:-1], data[:,-1]
+    clf = RandomForestClassifier()
+    params = {"n_estimators": [i for i in range(10, 200, 10)],
+            "max_features": [0.01, 0.1, 'sqrt']} # number of features
+    test_scores = run_tune_test(clf, params, X, y)
+    show_foldwise_scores(test_scores)
 
 
-# def fit_and_test(clf, train_X, train_y, test_X, test_y):
-#     clf = clf.fit(train_X, train_y)
-#     y_pred = clf.predict(test_X)
-#     correct = 0
-#
-#     # get accuracy
-#     for i in range(len(y_pred)):
-#         if y_pred[i] == test_y[i]:
-#             correct += 1
-#     accuracy = (correct/len(y_pred))
-#     print(f"Accuracy: {accuracy * 100}%")
-#     print("confusion_matrix: \n",
-#         confusion_matrix(test_y, y_pred, labels=[-1,1]))
-#     return accuracy
-#     # return correct
 
+
+
+
+    # sel = VarianceThreshold(threshold=(.8 * (1 - .8)))
+    # sel = sel.fit(train_X)
+    # train_X = sel.transform(train_X)
+    # test_X = sel.transform(test_X)
+    #
+    # model = RandomForestClassifier(n_estimators=100)
+    # model.fit(train_X, train_y)
+    # y_pred = model.predict(test_X)
+    # print(accuracy_score(test_y, y_pred))
+
+    # clfs = [
+    #     AdaBoostClassifier(n_estimators=10),
+    #     RandomForestClassifier(n_estimators=10),
+    #     MLPClassifier(learning_rate_init=0.001,
+    #                     learning_rate='constant',
+    #                     solver='sgd',
+    #                     max_iter=1000,
+    #                     early_stopping=True)
+    # ]
+    # plt.clf()
+    # for clf in clfs:
+    #     clf = clf.fit(train_X, train_y)
+    #     y_pred = clf.predict(test_X)
+    #     fpr, tpr, _ = roc_curve(test_y, y_pred, pos_label=1)
+    #     name = clf.__class__.__name__
+    #     plt.plot(fpr, tpr, label=name)
+    #
+    # plt.ylim((0, 1.1))
+    # plt.legend()
+    # plt.xlabel("False Positive Rate")
+    # plt.ylabel("True Positive Rate")
+    # plt.title("Comparison of ROC Curves")
+    # plt.show()
 
 def sign(num):
     '''
