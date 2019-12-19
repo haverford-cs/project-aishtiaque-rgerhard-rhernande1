@@ -23,9 +23,6 @@ from cv_util import run_tune_test, show_foldwise_scores
 
 from featurize import featurize_data
 
-import tensorflow as tf
-
-
 import warnings
 # suppress warnings
 warnings.simplefilter(action='ignore')
@@ -72,9 +69,9 @@ def main():
     # for i in range(50):
     # X_train, y_train, X_test, y_test = split_dataset(data)
     X, y = data[:,:-1], data[:,-1]
-    # clf = RandomForestClassifier()
-    # params = {"n_estimators": [i for i in range(10, 200, 10)],
-    #         "max_features": [0.01, 0.1, 'sqrt']} # number of features
+    # clf = AdaBoostClassifier()
+    # params = {"n_estimators": [i for i in range(10, 200, 10)],}
+            # "max_features": [0.01, 0.1, 'sqrt']} # number of features
     # clf = SVC()
     # params = {
     #     "C": [1.0, 10.0, 100.0, 1000.0],
@@ -84,30 +81,13 @@ def main():
     # show_foldwise_scores(test_scores)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y,
-            test_size=0.33, random_state=42)
-
-    # X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
-    # X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+            test_size=0.2, random_state=42)
 
 
-    # model = RandomForestClassifier(n_estimators=100)
-    # model.fit(X_train, y_train)
-    # y_pred = model.predict(X_test)
-    # print(accuracy_score(y_test, y_pred))
-    model = tf.keras.models.Sequential([
-      tf.keras.layers.Flatten(),
-      tf.keras.layers.Dense(128, activation='relu'),
-      tf.keras.layers.Dropout(0.2),
-      tf.keras.layers.Dense(10, activation='softmax')
-    ])
-
-    model.compile(optimizer='adam',
-                  loss='sparse_categorical_crossentropy',
-                  metrics=['accuracy'])
-
-    model.fit(X_train, y_train, epochs=5)
-
-    model.evaluate(X_test,  y_test, verbose=2)
+    model = RandomForestClassifier(n_estimators=100)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    print(accuracy_score(y_test, y_pred))
 
     # clfs = [
     #     AdaBoostClassifier(n_estimators=10),
@@ -120,9 +100,9 @@ def main():
     # ]
     # plt.clf()
     # for clf in clfs:
-    #     clf = clf.fit(train_X, train_y)
-    #     y_pred = clf.predict(test_X)
-    #     fpr, tpr, _ = roc_curve(test_y, y_pred, pos_label=1)
+    #     clf = clf.fit(X_train, y_train)
+    #     y_pred = clf.predict(X_test)
+    #     fpr, tpr, _ = roc_curve(y_test, y_pred, pos_label=1, drop_intermediate=False)
     #     name = clf.__class__.__name__
     #     plt.plot(fpr, tpr, label=name)
     #
