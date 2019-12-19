@@ -1,4 +1,8 @@
+import sys
+
 import numpy as np
+np.set_printoptions(threshold=sys.maxsize)
+
 import argparse
 import csv
 import random
@@ -22,6 +26,7 @@ import matplotlib.pyplot as plt
 from cv_util import run_tune_test, show_foldwise_scores
 
 from featurize import featurize_data
+from analyse_data import show_feature_frequencies
 
 import warnings
 # suppress warnings
@@ -69,6 +74,7 @@ def main():
     # for i in range(50):
     # X_train, y_train, X_test, y_test = split_dataset(data)
     X, y = data[:,:-1], data[:,-1]
+    show_feature_frequencies(X)
     # clf = AdaBoostClassifier()
     # params = {"n_estimators": [i for i in range(10, 200, 10)],}
             # "max_features": [0.01, 0.1, 'sqrt']} # number of features
@@ -81,13 +87,37 @@ def main():
     # show_foldwise_scores(test_scores)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y,
-            test_size=0.2, random_state=42)
+            test_size=0.3)
+
+    forest = ExtraTreesClassifier(n_estimators=250)
+
+    forest.fit(X_train, y_train)
+    importances = forest.feature_importances_
+    std = np.std([tree.feature_importances_ for tree in forest.estimators_],
+                 axis=0)
+    indices = np.argsort(importances)[::-1]
+
+    # Print the feature ranking
+    print("Feature ranking:")
+
+    for f in range(X.shape[1]):
+        print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+
+    # Plot the feature importances of the forest
+    plt.figure()
+    plt.title("Feature importances")
+    plt.bar(range(X.shape[1]), importances[indices],
+           color="r", yerr=std[indices], align="center")
+    plt.xticks(range(X.shape[1]), indices)
+    plt.xlim([-1, X.shape[1]])
+    plt.show()
 
 
-    model = RandomForestClassifier(n_estimators=100)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    print(accuracy_score(y_test, y_pred))
+    # model = AdaBoostClassifier(n_estimators=100)
+    # model.fit(X_train, y_train)
+    # y_pred = model.predict(X_test)
+    # accuracy = accuracy_score(y_test, y_pred)
+    # print(accuracy)
 
     # clfs = [
     #     AdaBoostClassifier(n_estimators=10),
