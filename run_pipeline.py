@@ -74,24 +74,20 @@ def main():
     # for i in range(50):
     # X_train, y_train, X_test, y_test = split_dataset(data)
     X, y = data[:,:-1], data[:,-1]
-    # feature_frequencies(X)
-    # feature_importances(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+            test_size=0.3)
+    # plot_feature_frequencies(X)
+    # plot_feature_importances(X, y)
     # clf = AdaBoostClassifier()
     # params = {"n_estimators": [i for i in range(10, 200, 10)],}
     #         "max_features": [0.01, 0.1, 'sqrt']} # number of features
-    # clf = SVC()
-    # params = {
-    #     "C": [1.0, 10.0, 100.0, 1000.0],
-    #     "gamma": [0.0001, 0.001, 0.01, 0.1, 1.0]
-    # }
     # test_scores = run_tune_test(clf, params, X, y)
     # show_foldwise_scores(test_scores)
 
     # scores = []
     # iterate = range(1, 1000, 10)
     # for i in iterate:
-    #     X_train, X_test, y_train, y_test = train_test_split(X, y,
-    #             test_size=0.3)
+
     #
     #     model = RandomForestClassifier(n_estimators=i)
     #     model.fit(X_train, y_train)
@@ -104,30 +100,30 @@ def main():
     # accuracy = accuracy_score(y_test, y_pred)
     # print(accuracy)
 
-    # clfs = [
-    #     AdaBoostClassifier(n_estimators=10),
-    #     RandomForestClassifier(n_estimators=10),
-    #     MLPClassifier(learning_rate_init=0.001,
-    #                     learning_rate='constant',
-    #                     solver='sgd',
-    #                     max_iter=1000,
-    #                     early_stopping=True)
-    # ]
-    # plt.clf()
-    # for clf in clfs:
-    #     clf = clf.fit(X_train, y_train)
-    #     y_pred = clf.predict(X_test)
-    #     fpr, tpr, _ = roc_curve(y_test, y_pred, pos_label=1, drop_intermediate=False)
-    #     name = clf.__class__.__name__
-    #     plt.plot(fpr, tpr, label=name)
-    #
+    clfs = [
+        AdaBoostClassifier(n_estimators=100),
+        RandomForestClassifier(n_estimators=100),
+        MLPClassifier(learning_rate_init=0.0001,
+                        learning_rate='constant',
+                        solver='sgd',
+                        max_iter=1000,
+                        early_stopping=True)
+    ]
+    plt.clf()
+    for clf in clfs:
+        clf = clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        fpr, tpr, _ = roc_curve(y_test, y_pred, pos_label=1, drop_intermediate=False)
+        name = clf.__class__.__name__
+        plt.plot(fpr, tpr, label=name)
+
     # plt.plot(iterate, scores, label="Accuracy of RandomForest")
     # plt.ylim((0, 1.1))
-    # plt.legend()
-    # plt.xlabel("Number of classifiers")
-    # plt.ylabel("Accuracy")
-    # plt.title("Accuracy of Random Forest with Varying Number of Classifiers (AAPL)")
-    # plt.show()
+    plt.legend()
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title(f"ROC Curve Comparison of Classifiers")
+    plt.show()
 
 def sign(num):
     '''
