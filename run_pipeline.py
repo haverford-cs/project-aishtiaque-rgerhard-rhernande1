@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 from cv_util import run_tune_test, show_foldwise_scores
 
 from featurize import featurize_data
-from analyse_data import feature_frequencies, feature_importances
+from visualize_data import plot_feature_frequencies, plot_feature_importances
 
 import warnings
 # suppress warnings
@@ -78,7 +78,7 @@ def main():
     # feature_importances(X, y)
     # clf = AdaBoostClassifier()
     # params = {"n_estimators": [i for i in range(10, 200, 10)],}
-            # "max_features": [0.01, 0.1, 'sqrt']} # number of features
+    #         "max_features": [0.01, 0.1, 'sqrt']} # number of features
     # clf = SVC()
     # params = {
     #     "C": [1.0, 10.0, 100.0, 1000.0],
@@ -87,17 +87,17 @@ def main():
     # test_scores = run_tune_test(clf, params, X, y)
     # show_foldwise_scores(test_scores)
 
-    scores = []
-    iterate = range(1, 1000, 10)
-    for i in iterate:
-        X_train, X_test, y_train, y_test = train_test_split(X, y,
-                test_size=0.3)
-
-        model = RandomForestClassifier(n_estimators=i)
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        scores.append(accuracy)
+    # scores = []
+    # iterate = range(1, 1000, 10)
+    # for i in iterate:
+    #     X_train, X_test, y_train, y_test = train_test_split(X, y,
+    #             test_size=0.3)
+    #
+    #     model = RandomForestClassifier(n_estimators=i)
+    #     model.fit(X_train, y_train)
+    #     y_pred = model.predict(X_test)
+    #     accuracy = accuracy_score(y_test, y_pred)
+    #     scores.append(accuracy)
 
 
 
@@ -121,13 +121,13 @@ def main():
     #     name = clf.__class__.__name__
     #     plt.plot(fpr, tpr, label=name)
     #
-    plt.plot(iterate, scores, label="Accuracy of RandomForest")
-    plt.ylim((0, 1.1))
-    plt.legend()
-    plt.xlabel("Number of classifiers")
-    plt.ylabel("Accuracy")
-    plt.title("Accuracy of Random Forest with Varying Number of Classifiers (AAPL)")
-    plt.show()
+    # plt.plot(iterate, scores, label="Accuracy of RandomForest")
+    # plt.ylim((0, 1.1))
+    # plt.legend()
+    # plt.xlabel("Number of classifiers")
+    # plt.ylabel("Accuracy")
+    # plt.title("Accuracy of Random Forest with Varying Number of Classifiers (AAPL)")
+    # plt.show()
 
 def sign(num):
     '''
